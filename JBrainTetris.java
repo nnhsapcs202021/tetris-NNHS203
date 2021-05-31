@@ -9,8 +9,8 @@ public class JBrainTetris extends JTetris
     private Brain brain; 
     private ArrayList<Brain> brainList; 
     private JComboBox brainCombo;
-    private Move move;
-    private boolean brainStatus = false; 
+    private Move nextMove;
+    private boolean enabled = false; 
     private JButton enableBrain;
     /**
      * Constructor for objects of class JBrainTetris
@@ -84,10 +84,35 @@ public class JBrainTetris extends JTetris
     
     public Piece pickNextPiece()
     {
-        int pieceNum = (int)(this.pieces.length * this.random.nextDouble());
-        return this.pieces[pieceNum];
+        if (enabled) {
+             Piece nextPiece = super.pickNextPiece();
+             board.commit();
+             nextMove = brain.bestMove(board, nextPiece, 20);
+             return nextPiece;
+          }
+        else {
+            return super.pickNextPiece();
+            }
+        
+        
+        
     }
-    
+    public void tick(int verb) 
+        {
+            super.tick(verb);
+         
+            if (enabled && verb == DOWN){
+            if (nextMove.getX() < currentX) {
+                   super.tick(LEFT);
+                }
+            else if (nextMove.getX() > currentX) {
+                    super.tick(RIGHT);
+                }
+            if (!currentPiece.equals(nextMove.getPiece())) {
+                    currentPiece = currentPiece.nextRotation();
+                }   
+            }   
+        }
     private void enableButtons()
     {
         this.startButton.setEnabled(!this.gameOn);
@@ -110,8 +135,8 @@ public class JBrainTetris extends JTetris
     {
         public void actionPerformed(ActionEvent e)
         {
-            brainStatus = !brainStatus;
-            enableBrain.setText("Brain ON = " + brainStatus);  
+            enabled = !enabled;
+            enableBrain.setText("Brain ON = " + enabled);  
         }
     }
     
