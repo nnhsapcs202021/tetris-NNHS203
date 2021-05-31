@@ -44,6 +44,42 @@ public final class Piece {
     private Piece(Point[] points)
     {
         // TODO: implement constructor
+        body = new Point[points.length]; 
+        for(int i=0;i<points.length;i++)
+        {
+            int x = (int) points[i].getX();
+            int y = (int) points[i].getY();
+            body[i]= new Point(x,y);
+        }
+        this.width = 0;
+        this.height = 0;
+        for(Point i : points) {
+            if(i.x > this.width) {
+                this.width = i.x;
+            }
+            if(i.y > this.height) {
+                this.height = i.y;
+            }
+        }
+        this.width += 1;
+        this.height += 1; // off by one because of index -1 
+        
+        this.skirt = new int[this.width];
+        int xIndex = 0;
+        for(int i = 0; i < skirt.length; i++)
+        {
+            skirt[i] = 3;
+        }
+        for(Point p : body)
+        {
+            xIndex = p.x;
+            if(p.y<skirt[xIndex])
+            {
+                skirt[xIndex] = p.y;
+                
+            }
+        }
+        
     }   
 
     /**
@@ -157,12 +193,22 @@ public final class Piece {
     public String toString()
     {
         String str = "";
-        
+        str += "\n" + "Width: " + this.width +"\n" + "Height: " + this.height + "\n" 
+        + "Body: "; 
+        for(Point i : body)
+        {
+            str += i + " "; 
+        }
+        str += "\n" + "Skirt: "; 
+        for(int i : skirt)
+        {
+            str += i + " "; 
+        }
         // TODO: build a string that contains all of the attributes of this Piece
-        
+
         return str;
     }
-    
+
     /**
      * Returns an array containing the first rotation of each of the 7 standard
      *      tetris pieces. The next (counterclockwise) rotation can be obtained
@@ -204,28 +250,30 @@ public final class Piece {
     private static Piece pieceRow(Piece firstPiece)
     {
         Piece piece = firstPiece;
-        
+
         System.out.println("\nfirst piece: " + piece);
 
         // maximum of 4 rotations until we are back at the first piece (we may break earlier)
-        for( int j = 0; j < 4; j++)
+        for(int j = 0; j < 4; j++)
         {
             // copy the points from the specified piece before transforming
             Point[] rotatedPoints = new Point[piece.getBody().length];
             for(int i = 0; i < rotatedPoints.length; i++)
             {
-                rotatedPoints[i] = new Point(piece.getBody()[i]);
+                int rotY = piece.getBody()[i].y;
+                int rotX = piece.getBody()[i].x;
+                rotatedPoints[i] = new Point(piece.height - 1 - rotY, rotX);
             }
 
             // TODO: step 1: reflect across the line y = x
-            
+            // (y,x)
             // TODO: step 2: reflect across y axis
-            
+            // (this.height - y,x)
             // TODO: step 3: translate right
-            
+            // (this.height - 1 - y,x) counter clockwise 
             // create the rotated piece, update next, prepare for nextIteration
             Piece rotatedPiece = new Piece(rotatedPoints);
-            
+
             System.out.println(rotatedPiece);
 
             // check if we are back to the original piece
